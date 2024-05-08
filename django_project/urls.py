@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, include
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
@@ -25,11 +25,11 @@ schema_view = get_schema_view(
 
 API_V1 = 'api/v1/'
 
-urlpatterns = [
+urlpatterns = (
     # Swagger
     path('', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api-docs/', schema_view.with_ui('swagger', cache_timeout=None), name='schema-swagger-ui'),
     # ================================================================================================
 
-    # path(API_V1, include("django_project.authentication.urls", namespace="auth")),
-]
+    path(API_V1, include("django_project.integrity_tests.urls", namespace="integrity_tests")),
+)

@@ -10,13 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
-from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+from django_project.environment_variables import EnvironmentVariables
+from django_project.project_setup import ProjectSetup
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
+env_vars = EnvironmentVariables()
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-9kij595!7eh7f-yjc#+v%j3hvq^lyb(_dtjc&i-33_9i-8ez)s'
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # PROJECT
+    f'{ProjectSetup.PROJECT_FOLDER}.integrity_tests'
 ]
 
 MIDDLEWARE = [
@@ -88,14 +89,7 @@ WSGI_APPLICATION = 'django_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': EnvironmentVariables.DATABASE_URL
 }
 
 # Password validation
@@ -130,10 +124,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, '../staticfiles')
+STATIC_ROOT = os.path.join(ProjectSetup.BASE_DIR, '../staticfiles')
 STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# CACHE
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://%s:%i/%s" % (env_vars.REDIS['host'], env_vars.REDIS['port'], env_vars.REDIS['db']),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

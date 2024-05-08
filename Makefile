@@ -1,5 +1,6 @@
 PIP := pip install
 DATABASE_PASS := postgres
+REDIS_PASSWORD := redis
 
 PROJECT_NAME := django-project
 PYTHON_VERSION := 3.11.4
@@ -27,10 +28,13 @@ create-venv: .create-venv setup-dev
 run-postgres:
 	docker start $(PROJECT_NAME)-postgres 2>/dev/null || docker run --name $(PROJECT_NAME)-postgres -p 5432:5432 -e POSTGRES_PASSWORD='$(DATABASE_PASS)' -d postgres:15-alpine
 
+run-redis:
+	docker start $(PROJECT_NAME)-redis 2>/dev/null || docker run --name $(PROJECT_NAME)-redis -p 6379:6379 -e REDIS_PASSWORD='$(REDIS_PASSWORD)' -d redis:3.2.12-alpine
+
 containers-down:
 	docker stop $$(docker ps -aq)
 
-containers-up: run-postgres
+containers-up: run-postgres run-redis
 
 containers-reset: containers-down containers-up
 
